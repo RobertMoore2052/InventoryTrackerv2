@@ -3,5 +3,6 @@
 public class Category : BaseDomainModel
 {
     public int CategoryId { get; set; }
-    public InventoryItems InventoryItemId { get; set; } = null!;
+
+    public List<InventoryItem> InventoryItems { get; set; } = new();
 }
