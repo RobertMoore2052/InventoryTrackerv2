@@ -1,5 +1,15 @@
-﻿using InventoryTracker.Domain;
+﻿using InventoryTracker.Data;
+using Microsoft.EntityFrameworkCore;
 
+var options = new DbContextOptionsBuilder<InventoryTrackerDbContext>()
+    .UseSqlite("Data Source=InventoryTracker.db")
+    .Options;
+
+using var context = new InventoryTrackerDbContext(options);
+
+
+
+/*
 List<Category> categories = new()
 {
     new Category
@@ -218,3 +228,4 @@ foreach (Category category in categories)
 {
     Console.WriteLine($"{category.Name}: {category.InventoryItems.Count} items");
 }
+*/
