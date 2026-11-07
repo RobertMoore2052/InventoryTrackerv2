@@ -1,15 +1,64 @@
 ﻿using InventoryTracker.Data;
+using InventoryTracker.Domain;
 using Microsoft.EntityFrameworkCore;
 
+var databaseFolder = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+    "InventoryTrackerV2");
+
+Directory.CreateDirectory(databaseFolder);
+
+var databasePath = Path.Combine(
+    databaseFolder,
+    "InventoryTracker.db");
+
 var options = new DbContextOptionsBuilder<InventoryTrackerDbContext>()
-    .UseSqlite("Data Source=InventoryTracker.db")
+    .UseSqlite(DatabaseSettings.GetConnectionString())
     .Options;
 
 using var context = new InventoryTrackerDbContext(options);
 
+var savedInventoryItems = await context.InventoryItems
+    .OrderBy(item => item.InventoryItemId)
+    .ToListAsync();
 
+foreach (InventoryItem item in savedInventoryItems)
+{
+    Console.WriteLine($"{item.InventoryItemId}: {item.Name}");
+}
 
 /*
+if (!await context.Categories.AnyAsync())
+{
+    List<Category> categories = new()
+    {
+        new Category
+        {
+            CategoryId = 1,
+            Name = "Hardware"
+        },
+        new Category
+        {
+            CategoryId = 2,
+            Name = "Networking"
+        },
+        new Category
+        {
+            CategoryId = 3,
+            Name = "Storage"
+        },
+        new Category
+        {
+            CategoryId = 4,
+            Name = "Accessories"
+        }
+    };
+
+    context.Categories.AddRange(categories);
+    await context.SaveChangesAsync();
+}
+
+
 List<Category> categories = new()
 {
     new Category

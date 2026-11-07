@@ -8,13 +8,10 @@ public class InventoryTrackerDbContextFactory
 {
     public InventoryTrackerDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder =
-            new DbContextOptionsBuilder<InventoryTrackerDbContext>();
+        var options = new DbContextOptionsBuilder<InventoryTrackerDbContext>()
+            .UseSqlite(DatabaseSettings.GetConnectionString())
+            .Options;
 
-        optionsBuilder.UseSqlite(
-            "Data Source=InventoryTracker.db");
-
-        return new InventoryTrackerDbContext(
-            optionsBuilder.Options);
+        return new InventoryTrackerDbContext(options);
     }
 }
