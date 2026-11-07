@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="InventoryTracker.Console/InventoryTracker.Console.csproj" />
+  <Project Path="InventoryTracker.Data/InventoryTracker.Data.csproj" Id="49142d07-189a-493c-b0e4-b6836b3eaac3" />
   <Project Path="InventoryTracker.Domain/InventoryTracker.Domain.csproj" />
 </Solution>

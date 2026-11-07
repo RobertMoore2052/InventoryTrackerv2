@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InventoryTracker.Data\InventoryTracker.Data.csproj" />
     <ProjectReference Include="..\InventoryTracker.Domain\InventoryTracker.Domain.csproj" />
   </ItemGroup>
 

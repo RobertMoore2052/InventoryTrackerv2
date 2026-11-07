@@ -1,5 +1,4 @@
 ﻿using InventoryTracker.Domain;
-using System.Security.Cryptography.X509Certificates;
 
 List<Category> categories = new()
 {
@@ -217,5 +216,5 @@ Console.WriteLine();
 
 foreach (Category category in categories)
 {
-    Console.WriteLine($"{category.Name}: {category.InventoryItems.Count()} items");
+    Console.WriteLine($"{category.Name}: {category.InventoryItems.Count} items");
 }
