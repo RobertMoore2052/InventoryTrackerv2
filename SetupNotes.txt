@@ -1,0 +1,194 @@
+Step 1: Domains
+
+* We set up the InventoryTracker.Domain project, and added the BaseDomainModel.cs, 
+	Category.cs, and InventoryItem.cs classes to it.
+* We programmed each class with a:
+	- namespace
+	- Appropriate fields/types
+	- relationship data configurations
+* Connected GitHub to track, and made the initial connection/push
+
+Step 2: In-memory functionality
+* Add a .Console program to run as an executable program.
+* Add a temporary In-Memory list of items, starting with 4 new categories in this case
+* Added a C# mini-program that pulls data from the lists to display each Inventory Item's 
+	data, how it connects
+	to Categories, and then the Categories data and how it connects to Inventory Items.
+
+Step 3: Data Persistence
+* Add .Data project
+	* Reference .Domain
+	* Add:
+		* Microsoft.EntityFrameworkCore.Sqlite
+		* Microsoft.EntityFrameworkCore.Design
+* Add Microsoft.EntityFrameworkCore.Design to .Console
+	* Needed because .Console is the startup project for EF tooling
+* Create InventoryTrackerDbContext
+	* Inherit from DbContext
+	* Add constructor with:
+		* DbContextOptions<InventoryTrackerDbContext>
+	* Add DbSet<> properties for:
+		* Category
+		* InventoryItem
+* Add .Data/Configurations/CategoryConfiguration.cs
+	* Use:
+		* IEntityTypeConfiguration<Category>
+		* EntityTypeBuilder<Category>
+	* Configure relationship:
+		* .HasMany()
+		* .WithOne()
+		* .HasForeignKey()
+* Add OnModelCreating() inside INventoryTrackerDbContext
+	* Call:
+		* base.OnModelCreating(modelBuilder)
+	* Apply configuration classes with:
+		* modelBuilder.ApplyConfigurationsFromAssembly(...)
+* Create database connection/configuration
+	* Build DbContextOptionsBuilder<InventoryTrackerDbContext>
+	* Use:
+		* .UseSqlite(...)
+		* .Options
+	* Create:
+		* using var context = new InventoryTrackerDbContext(options);
+* Use one shared SQLite database location
+	* Avoid multiple database files from relative paths
+	* Use the same connection string for:
+		* runtime
+		* EF design-time tooling
+* Create InventoryTrackerDbContextFactory
+	* Implements:
+		* IDesignTimeDbContextFactory<InventoryTrackerDbContext>
+	* Lets dotnet ef create the DbContext at design time
+* Verify DbContext
+	* dotnet ef dbcontext info --project InventoryTracker.Data --startup-project 
+		InventoryTracker.Console
+* Create initial migration:
+	* dotnet ef migrations add InitialCreate --project InventoryTracker.FData --startup-project 
+		InventoryTracker.Console
+	* Inspect migration for:
+		* Categories table
+		* InventoryItems table
+		* primary keys
+		* CategoryId foreign key
+* Apply migration:
+	* dotnet ef database update --project InventoryTracker.Data --startup-project 
+		InventoryTracker.Console
+	* Creates/updates SQLite database
+	* Adds __EFMigrationsHistory
+* Migration workflow:
+	* change model
+	* add migration
+	* inspect migration
+	* update database
+* Replace in-memory data with startup seed routing
+	* Check if data exists with:
+		* .AnyAsync()
+	* Add objects with:
+		* .AddRange()
+	* Save with:
+		* .SaveChangesAsync()
+* Seed:
+	* Categories
+	* InventoryItems
+* Query persistent data
+	* Use:
+		* .OrderBy()
+		* .ToListAsync()
+	* Print results to confirm data survives program restart
+* Load Related data
+	* Use:
+		* .Include(item => item.Category)
+	* Confirms EF Core can load navigation properties from the database
+* At this point EF Core handles:
+	* persistent storage
+	* database inserts/updates
+	* LINQ database queries
+	* foreign-key relationships
+	* related-data loading
+
+Step 4: ASP.NET Core API
+* Create InventoryTracker.Api and set project references
+	- InvenetryTracker.Api -> InventoryTracker.Data
+	- InventoryTracker.Api -> InventoryTracker.Domain
+
+* Remove the extra built-in WeatherForecast items
+* Wire the following in the database
+	- InventoryTrackerDbContext
+		-builder.Services.AddDbContext(...)
+			- SQLite
+				* NOTE: We can use .UseSqlite(DatabaseSettings.GetConnectionString())
+
+* Create the first controller
+	- InventoryTracker.Api/Controllers/InventoryItemsController.cs
+		- [ApiController]
+		- [Route("api/[controller]")]
+		- : ControllerBase
+			- private readonly InventoryTrackerDbContext _context;
+			- IvnentoryItemsController()
+				- _context = context;
+
+* Create the response DTO
+	- InventoryTracker.Api/Dtos/InventoryItemDto.cs
+	- Inside InventoryItemsController.cs, add:
+		- using InventoryTracker.Api.Dtos;
+		- using Microsoft.EntityFrameworkCore;
+	- Then, add the GetInventoryItems() method for the first endpoint
+	- Now, we can create the GetInvventoryItem(int id) endpoint
+		- Start using error checking (if item == null -> return NotFound())
+
+* Install/wire Scalar
+	- In .Api project, install Scalar.AspNetCore
+	- In Program.cs:
+		- add using Scalar.AspNetCore;
+		- make sure you have builder.Services.AddOpenApi();
+		- after that, add:
+			app.MapScalarApiReference();
+		- Left click the https arrow at top, then InventoryTracker.Api Debug Properties
+			- On Https, go to bottom and:
+				- Check 'Launch browser'
+				- In Url, add scalar
+	- Now, when running the .Api project, it will open scalar in a browser.
+
+* SETTING UP POST
+	* Create the CreateInventoryItemDto.cs file
+		- Leave off InventoryItemId, CategoryName, and Category object because those are
+			not things the client should supply when creating a new inventory item.
+	* Create the POST endpoint
+		- Use error checking to see if the CategoryId exists using .AnyAsync()
+			- If not exist, return BadRequest("Category does not exist.");
+		- Set item = new InventoryItemDto with all of the properties = dto fields
+		- Add item to _context.InventoryItems through .Add();
+		- SaveChangesAsync();
+		- Create the result:
+			- Set all fields == to item.Properties EXCEPT
+				- CategoryName = await _context.Categories
+					.Where(category => category.CategoryId == item.CategoryId)
+					.Select(category => category.Name)
+					.FirstAsync()
+		- CreatedAtAction
+		- Test
+
+* SETTING UP PUT
+	- Create Dtos/UpdateInventoryItemDto.cs
+		- set it as [HttpPut("{id}")]
+		- use:
+			- public async Task<IActionResult> UpdateInventoryItem(
+				int id,
+				UpdateInventoryItemDto dto)
+		- find the item with .FirstOrDefaultAsync()
+		- if item isn't found from id, return NotFound();
+		- check if categoryId used exists with AnyAsync()
+			- if not, return BadRequest("Category does not exist.");
+		- set item.Properties = dto.Properties
+		- SaveChangesAsync()
+		- return NoContent();
+
+* SETTING UP DELETE
+	- start with [HttpDelete("{id}")]
+	- do public async Task<IActionResult> DeleteInventoryItem(int id)
+		- set item = await _context.InventoryItems with .FirstOrDefaultAsync to ItemId
+		- check if item == null (return NotFound())
+		- use _context.InventoryItems.Remove(item);
+		- SaveChangesAsync();
+		- return NoContent();
+		- Test

@@ -1,0 +1,6 @@
+@InventoryTracker.Api_HostAddress = https://localhost:5006
+
+GET {{InventoryTracker.Api_HostAddress}}/program/
+Accept: application/json
+
+###

@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="SetupNotes.txt" />
+  </Folder>
+  <Project Path="InventoryTracker.Api/InventoryTracker.Api.csproj" Id="6203daee-0e2d-491e-b388-3f6fef4f7578" />
   <Project Path="InventoryTracker.Console/InventoryTracker.Console.csproj" />
   <Project Path="InventoryTracker.Data/InventoryTracker.Data.csproj" Id="49142d07-189a-493c-b0e4-b6836b3eaac3" />
   <Project Path="InventoryTracker.Domain/InventoryTracker.Domain.csproj" />
