@@ -192,3 +192,46 @@ Step 4: ASP.NET Core API
 		- SaveChangesAsync();
 		- return NoContent();
 		- Test
+
+* SETTING UP LOW-STOCK
+	- Add [HttpGet("low-stock")]
+		- Create List using:
+			- item IsActive && quantity <= reorderlevel
+			- OrderBy (quantity)
+			- Select (all fields = item.Property)
+			- .ToListAsync();
+		- return Ok(items);
+
+* GET INVENTORY BY CATEGORY
+	- Add HttpGet("category/{categoryId}")
+	- Same as above just:
+		- Create List using:
+			- item categoryId == categoryId
+			- OrderBy (name)
+			- Select (all fields = item.Property)
+			- .ToListAsync();
+
+* GET LOW-STOCK INVENTORY BY CATEGORY
+	- Basicall Combining last two
+
+
+* ADDING CATEGORIES AS AN API RESOURCE
+	- Create CategoryDto
+		- set CategoryId, Name, and InventoryItemCount
+	- Create CategoriesController
+		- using:
+			- .Api.Dtos;
+			- .Data;
+			- AspNetCore.Mvc;
+			- .EntityFrameworkCore
+		- [ApiController]
+		- [Route("api/[controller]")
+		- Set up remainder the same as InventoryItemsController
+
+* CREATE CATEGORIES ENDPOINTS
+	- Get all categories
+	- Get categories/{id} (return 404 if none)
+	- Post (return 201 created)
+	- Put categories/{id} (return 404 if no exist, 204 if success)
+	- Delete categories/{id} (return 404 if missing, 400 if inventory items still use it, 
+		204 if deleted
