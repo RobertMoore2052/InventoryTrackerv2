@@ -275,3 +275,8 @@ SORTED BY NAME
 						return BadRequest("Search term is required.");
 					}
 				AFTER THE INITIAL CURLY BRACE FOR THIS METHOD
+
+	STEP 5: WEB UI (using ASP.NET Core Razor Pages)
+	* Add a new project to solution
+		- InventoryTracker.Web
+		- Use: ASP.NET Core Web App

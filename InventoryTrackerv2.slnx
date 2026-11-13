@@ -6,4 +6,5 @@
   <Project Path="InventoryTracker.Console/InventoryTracker.Console.csproj" />
   <Project Path="InventoryTracker.Data/InventoryTracker.Data.csproj" Id="49142d07-189a-493c-b0e4-b6836b3eaac3" />
   <Project Path="InventoryTracker.Domain/InventoryTracker.Domain.csproj" />
+  <Project Path="InventoryTracker.Web/InventoryTracker.Web.csproj" Id="3aaac991-e14f-41b3-b1b1-19dcb87977c1" />
 </Solution>
