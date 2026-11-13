@@ -280,3 +280,228 @@ SORTED BY NAME
 	* Add a new project to solution
 		- InventoryTracker.Web
 		- Use: ASP.NET Core Web App
+		- Make InventoryTracker.Web the Startup Project
+
+	* Give the .Web project the API address
+		- Go to: InventoryTracker.Api/Properties/launchSettings.json
+			- Find the profile you actually run (will look like:
+				"InventoryTracker.Api": {
+					"commandName": "Project",
+					"dotnetRunMessages": true,
+					"launchBrowser": true,
+					"applicationUrl": "https://localhost:###1;http://localhost:###2",
+					"environmentVariables": {
+						"ASPNETCORE_ENVIRONMENT": "Development"
+					}
+				}
+		- In InventoryTracker.Web/appsettings.json, add:
+			{
+				"ApiBaseUrl": "https://localhost:###1"
+			}
+		- Then, in the Web project's Program.cs, before:
+			var app = builder.Build();
+			add:
+				builder.Services.AddHttpClient("InventoryTrackerApi", client =>
+				{
+					client.BaseAddress = new Uri(
+						builder.Configuration["ApiBaseUrl"]!);
+				});
+			* Could create a launchSettings.json in .Web, but the main rule is:
+				API port != Web port
+					-i.e.:
+						API: https://localhost:7184
+						Web: https://localhost:7284
+
+	* First Razor Page Using API
+		- Create:
+			InventoryTracker.Web/Models/InventoryItemViewModel.cs
+			with:
+				namespace InvenotryTracker.Web.Models;
+
+				public class InventoryItemViewModel
+				{
+					public int InventoryItemId {get; set; }
+					public string Name { get; set; } = "";
+					public string? Description { get; set; }
+					public int Quantity { get; set; }
+					public int ReorderLevel { get; set; }
+					public bool IsActive { get; set; }
+					public int CategoryId { get; set; }
+					public string CategoryName { get; set; } = "";
+				}
+			- Why?
+				*The API returns JSON shaped like InventoryItemDto. The 
+					Web project needs a C# type into which that JSON can
+					be converted.
+				So:
+					API
+					InventoryItemDto
+						|
+						V JSON
+					Web
+					InventoryItemViewModel
+
+		- Under Pages, create a folder:
+			Inventory
+		- then, add a Razor Page named: Index
+
+		Replace contents of the .cshtml.cs file with:
+			using InventoryTracker.Web.Models;
+			using Microsoft.AspNetCore.Mvc.RazorPages;
+			using System.Net.Http.Json;
+
+			namespace InventoryTracker.Web.Pages.Inventory;
+
+			public class IndexModel : PageModel
+			{
+				private readonly IHttpClientFactory _httpClientFactory;
+
+				public List<InventoryItemViewModel> InventoryItems { get; set; } = [];
+
+				public IndexModel(IHttpClientFactory httpClientFactory)
+				{
+					_httpClientFactory = httpClientFactory;
+				}
+
+				public async Task OnGetAsync()
+				{
+					var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
+
+					InventoryItems =
+						await client.GetFromJsonAsync<List<InventoryItemViewModel>>(
+							"api/InventoryItems")
+						?? [];
+				}
+			}
+
+		- NOTES ON THIS SECTION
+			- IHttpClientFactory
+				* Gives the page access to the client registered in Program.cs
+			- _httpClientFactory.CreateClient("InventoryTrackerApi")
+				* Retrieves that configured client
+			- GetFromJsonAsync<List<InventoryItemViewModel>>(...)
+				* does two things:
+					- Send HTTP GET request
+					- Deserialize returned JSON into C# objects
+				* So this:
+					"api/InventoryItems"
+					- gets combined with your configured base address
+
+		* Display the Data
+			- In Index.cshtml, start with:
+				@page
+				@model InventoryTracker.Web.Pages.Inventory.IndexModel
+
+				<h1>Inventory</h1>
+
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Category</th>
+							<th>Quantity</th>
+							<th>Reorder Level</th>
+							<th>Active</th>
+						</tr>
+    				</thead>
+
+    				<tbody>
+        				@foreach (var item in Model.InventoryItems)
+        				{
+            				<tr>
+                				<td>@item.Name</td>
+                				<td>@item.CategoryName</td>
+                				<td>@item.Quantity</td>
+                				<td>@item.ReorderLevel</td>
+                				<td>@item.IsActive</td>
+            				</tr>
+        				}
+    				</tbody>
+				</table>
+
+			Key Concepts:
+				@model
+					- tells the page which PageModel it belongs to
+				Model.InventoryItems
+					- assesses the C# property from Index.cshtml.cs
+				@foreach
+					- C# loop embedded inside the HTML
+
+		* Run Requirements
+			- At this point, both .Api and .Web need to be running
+				- Right click Solution>Configure Startup Projects
+				- Set both .Api and .Web as Start with Debugging
+				* You can now disable the .Api project from opening a https browser:
+					- Right Click .Api > Properties
+					- In Debug>General, click 'Open debug launch profiles UI'
+					- In https, scroll down to 'Launch browser' and disable
+			- Hit F5
+				- At the web browser that opens at localhost:###1, add /Inventory
+					- Should see the inventory list pulled
+
+	* Route Parameters
+		* Create
+			- Pages/Inventory
+				/Details.cshtml
+				/Details.cshtml.cs
+		* In Details.cshtml, start route with:
+			@page "{id:int}"	(This makes url /Inventory/Details/12)
+																	| = id
+		* In Details.cshtml.cs:
+			using InventoryTracker.Web.Models;
+			using Microsoft.AspNetCore.Mvc;
+			using Microsoft.AspNetCore.Mvc.RazorPages;
+			using System.Net.Http.Json;
+
+			namespace InventoryTracker.Web.Pages.Inventory;
+
+			public class DetailsModel : PageModel
+			{
+    			private readonly IHttpClientFactory _httpClientFactory;
+
+    			public InventoryItemViewModel? InventoryItem { get; set; }
+
+    			public DetailsModel(IHttpClientFactory httpClientFactory)
+    			{
+       			 _httpClientFactory = httpClientFactory;
+    			}
+
+    			public async Task<IActionResult> OnGetAsync(int id)
+    			{
+     			   var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
+        
+     			   InventoryItem = 
+     			       await client.GetFromJsonAsync<InventoryItemViewModel>(
+     			           $"api/InventoryItem/{id}");
+
+     			   if (InventoryItem == null)
+     			   {
+     			       return NotFound();
+     			   }
+
+     			   return Page();
+    			}
+			}
+
+			*WHAT THIS DOES
+				- User visits /Inventory/Details/12
+					- razor supplies id = 12
+					- HttpClient calls API /api/InventoryItems/12
+					- API returns JSON
+					- JSON becomes InventoryItemViewModel
+					- Razor Page displays it
+
+			*Then, in Index.cshtml:
+				- in the table, add an extra column at the end (<th></th>)
+				- in the foreach section, add an extra row at the end:
+					<td>
+						<a asp-page="./Details"
+						   asp-route-id="@item.InventoryItemId">
+							Details
+						</a>
+					</td>
+
+				* This let's Razor generate a link roughly equivalent to:
+					/Inventory/Details/{InventoryItemId}
+				because your Details.cshtml contains:
+					@page "{id:int}"

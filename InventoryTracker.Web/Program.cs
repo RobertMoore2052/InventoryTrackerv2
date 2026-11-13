@@ -2,6 +2,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient("InventoryTrackerApi", client =>
+    {
+        client.BaseAddress = new Uri(
+            builder.Configuration["ApiBaseUrl"]!);
+    });
 
 var app = builder.Build();
 

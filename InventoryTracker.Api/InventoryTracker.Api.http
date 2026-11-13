@@ -1,4 +1,4 @@
-@InventoryTracker.Api_HostAddress = https://localhost:5006
+@InventoryTracker.Api_HostAddress = https://localhost:7245
 
 GET {{InventoryTracker.Api_HostAddress}}/program/
 Accept: application/json
