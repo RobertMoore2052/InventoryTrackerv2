@@ -235,3 +235,43 @@ Step 4: ASP.NET Core API
 	- Put categories/{id} (return 404 if no exist, 204 if success)
 	- Delete categories/{id} (return 404 if missing, 400 if inventory items still use it, 
 		204 if deleted
+
+* BUILD FIRST 'SEARCH' ENDPOINT
+PROMPT: RETURN ANY ITEMS THAT CONTAIN THE SEARCH TERM IN EITHER THE NAME OR DESCRIPTION FIELD, 
+SORTED BY NAME
+	- Start with HttpGet with the route being /api/InventoryItems/search
+	- Add the search term (in this case, string term)
+		- This should make the url api/inventoryitems/search?term=searchTermHere
+	- .Where(item => item.Name.Contains(term)
+	- Description Note: Description is a nullable field, so we have to account for that with:
+		- item.Description != null && item.Description.Contains(term))
+	- Whole .Where() clause:
+		-	.Where(item =>
+				(item.Name.Contains(term) ||
+				(item.Description != null && item.Description.Contains(term))
+		-Finish with:
+			.OrderBy(...)
+			.Select(...)
+			.ToListAsync()
+		-Return Ok(items);
+	-EXTRA NOTES
+		-Can make search case-insensitive by making all InventoryItem
+			properties and the search term variable use .ToLower(). Ex:
+			- item.Name.ToLower().Contains(term.ToLower())
+		-Can make search use Wildcards by:
+			-specifying patter:
+				-	var pattern = term.Replace("*", "%");
+			- then using EF.Functions.Like(...)
+				- Ex:
+					-	.Where(item =>
+							EF.Functions.Like(item.Name, pattern) ||
+							(item.Description != null &&
+							EF.Functions.Like(item.Description, pattern)))
+			- NOTE: DOING THIS REQUIRES THE USE OF WILDCARDS UNLESS YOU ARE SEARCHING EXACT
+			- ALSO, YOU COULD RESULT IN A STRING OF "%%", WHICH WOULD BE EVERYTHING.
+				TO FIX:
+					if (string.IsNullOrWhiteSpace(term))
+					{
+						return BadRequest("Search term is required.");
+					}
+				AFTER THE INITIAL CURLY BRACE FOR THIS METHOD

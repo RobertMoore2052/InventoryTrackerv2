@@ -185,12 +185,27 @@ namespace InventoryTracker.Api.Controllers
             return Ok(items);
         }
 
-        [HttpGet("category/{categoryId}")]
-        public async Task<ActionResult<List<InventoryItemDto>>> GetItemByCategory(
-            int categoryId)
+        [HttpGet("search")]
+        public async Task<ActionResult<List<InventoryItemDto>>> SearchInventoryItems(
+            string term)
         {
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                return BadRequest("Search term is required.");
+            }
+
+            var pattern = term.Replace("*", "%");
+
+            if (!term.Contains("*"))
+            {
+                pattern = $"{pattern}%";
+            }
+
             var items = await _context.InventoryItems
-                .Where(item => item.CategoryId == categoryId)
+                .Where(item => 
+                    EF.Functions.Like(item.Name, pattern) ||
+                    (item.Description != null &&
+                    EF.Functions.Like(item.Description, pattern)))
                 .OrderBy(item => item.Name)
                 .Select(item => new InventoryItemDto
                 {
@@ -206,40 +221,6 @@ namespace InventoryTracker.Api.Controllers
                 .ToListAsync();
 
             return Ok(items);
-        }
-
-        [HttpGet("category/{categoryId}/low-stock")]
-        public async Task<ActionResult<List<InventoryItemDto>>> GetLowStockItemsByCategory(
-            int categoryId)
-        {
-            var items = await _context.InventoryItems
-                .Where(item =>
-                item.CategoryId == categoryId &&
-                item.IsActive &&
-                item.Quantity <= item.ReorderLevel)
-                .OrderBy(item => item.Quantity)
-                .Select(item => new InventoryItemDto
-                {
-                    InventoryItemId = item.InventoryItemId,
-                    Name = item.Name,
-                    Description = item.Description,
-                    Quantity = item.Quantity,
-                    ReorderLevel = item.ReorderLevel,
-                    IsActive = item.IsActive,
-                    CategoryId = item.CategoryId,
-                    CategoryName = item.Category.Name
-                })
-                .ToListAsync();
-
-            return Ok(items);
-        }
-
-        [HttpGet($"search?term={term}")]
-        public async Task<ActionResult<List<InventoryItemDto>>> GetItemsBySearchTerm(
-            string term)
-        {
-            var items = await _context.InventoryItems
-                .ContainsAsync()
         }
     }
 }
