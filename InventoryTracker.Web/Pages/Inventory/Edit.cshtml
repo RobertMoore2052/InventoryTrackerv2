@@ -7,7 +7,10 @@
 
 <h1>Edit Inventory Item</h1>
 
-<form method="post">
+<form method="post"
+    asp-page="./Edit"
+    asp-route-id="@Model.InventoryItem.InventoryItemId">
+
     <div asp-validation-summary="ModelOnly"
         class="text-danger"></div>
 

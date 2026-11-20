@@ -1,5 +1,4 @@
 using InventoryTracker.Web.Models;
-using InventoryTracker.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Net.Http.Json;
@@ -63,7 +62,7 @@ public class EditModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostSync()
+    public async Task<IActionResult> OnPostAsync()
     {
         var client =
             _httpClientFactory.CreateClient("InventoryTrackerApi");
@@ -79,6 +78,8 @@ public class EditModel : PageModel
 
         if (!response.IsSuccessStatusCode)
         {
+            var error = await response.Content.ReadAsStringAsync();
+
             Categories =
                 await client.GetFromJsonAsync<List<CategoryViewModel>>(
                     "api/Categories")
@@ -86,11 +87,11 @@ public class EditModel : PageModel
 
             ModelState.AddModelError(
                 string.Empty,
-                "Unable to update inventory item.");
+                $"Unable to update inventory item. Status: {(int)response.StatusCode}. {error}");
 
             return Page();
         }
 
-        return RedirectToPage("/Index");
+        return RedirectToPage("./Index");
     }
 }

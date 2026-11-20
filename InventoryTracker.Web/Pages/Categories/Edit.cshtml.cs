@@ -7,7 +7,7 @@ namespace InventoryTracker.Web.Pages.Categories;
 
 public class EditModel : PageModel
 {
-    private readonly IHttpClientFactory httpClientFactory;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     [BindProperty]
     public EditCategoryViewModel Category { get; set; } = new();

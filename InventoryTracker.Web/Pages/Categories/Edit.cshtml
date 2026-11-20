@@ -8,11 +8,11 @@
 <h1>Edit Category</h1>
 
 <form method="post">
+    <div asp-validation-summary="ModelOnly"
+            class="text-danger"></div>
+
     <input type="hidden"
         asp-for="Category.CategoryId" />
-
-        <div asp-validation-summary="ModelONly"
-            class="text-danger"></div>
 
         <div class="mb-3">
             <label asp-for="Category.Name"
