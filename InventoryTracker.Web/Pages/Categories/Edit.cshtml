@@ -1,0 +1,33 @@
+﻿@page "{id:int}"
+@model InventoryTracker.Web.Pages.Categories.EditModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+}
+
+<h1>Edit Category</h1>
+
+<form method="post">
+    <input type="hidden"
+        asp-for="Category.CategoryId" />
+
+        <div asp-validation-summary="ModelONly"
+            class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Category.Name"
+                class="form-label"></label>
+            <input asp-for="Category.Name"
+                    class="form-control" />
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Save Changes
+        </button>
+
+        <a asp-page="./Index"
+                class="btn btn-secondary">
+            Cancel
+        </a>
+</form>

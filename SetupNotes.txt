@@ -843,7 +843,7 @@ SORTED BY NAME
 						* so pages look like /Inventory/Edit/12
 
 			- Update Edit.cshtml.cs
-				-	using INvenotryTracker.Web.Models;
+				-	using InvenotryTracker.Web.Models;
 					using InventoryTracker.Web.Models;
 					using Microsoft.AspNetCore.Mvc;
 					using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -1227,4 +1227,92 @@ SORTED BY NAME
 								</a>
 
 			* Categories page
-				- 
+				- Add:
+					- Pages/Categories/Index.cshtml & Index.cshtml.cs
+
+				- Index.cshtml.cs:
+using InventoryTracker.Web.Models;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Http.Json;
+
+namespace InventoryTracker.Web.Pages.Categories;
+
+public class IndexModel : PageModel
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public List<CategoryViewModel> Categories { get; set; } = [];
+
+    public IndexModel(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFafctory;
+    }
+
+    public async Task OnGetAsync()
+    {
+        var client =
+            _httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        Categories =
+            await client.GetFromJsonAsync<List<CategoryViewModel>>(
+                "api/Categories")
+            ?? [];
+    }
+}
+
+				- Index.cshtml:
+@page
+@model InventoryTracker.Web.Pages.Categories.IndexModel
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<h1>Categories</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Inventory Items</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var category in Model.Categories)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>@category.InventoryItemCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+			- Add permanent shortcut in _Layout.cshtml:
+				-		<li class="nav-item">
+                            <a class="nav-link text-dark"
+                                asp-page="/Categories/Index">
+                                    Categories
+                            </a>
+                        </li>
+
+		* Add Create Category
+			- Create:
+				- Pages/Categories/.
+					- Create.cshtml
+					- Create.cshtml.cs
+				- Models/CreateCategoryViewModel.cs
+
+			- Add Link in Categories/Index.cshtml:
+				-	<a asp-page="./Create" class="btn btn-primary">
+						Add Category
+					</a>
+
+			- CreateCategoryViewModel.cs, Create.cshtml.cs, and Create.cshtml off of existing code...
+
+
+
+
+
+			

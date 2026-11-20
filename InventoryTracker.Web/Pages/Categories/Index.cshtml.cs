@@ -12,7 +12,7 @@ public class IndexModel : PageModel
 
     public IndexModel(IHttpClientFactory httpClientFactory)
     {
-        _httpClientFactory = httpClientFafctory;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task OnGetAsync()
