@@ -18,11 +18,22 @@ public class DetailsModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
-        var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
-        
-        InventoryItem = 
-            await client.GetFromJsonAsync<InventoryItemViewModel>(
-                $"api/InventoryItem/{id}");
+        var client = 
+            _httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        var response = await client.GetAsync(
+            $"api/InventoryItems/{id}");
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        InventoryItem =
+            await response.Content
+                .ReadFromJsonAsync<InventoryItemViewModel>();
 
         if (InventoryItem == null)
         {

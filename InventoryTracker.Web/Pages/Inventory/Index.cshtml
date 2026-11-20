@@ -30,8 +30,18 @@
                 <td>@item.IsActive</td>
                 <td>
                     <a asp-page="./Details"
-                       asp-route-id="@item.InventoryItemId">
-                        Details
+                        asp-route-id="@item.InventoryItemId">
+                            Details
+                    </a>
+
+                    <a asp-page=".\Edit"
+                        asp-route-id="@item.InventoryItemId">
+                            Edit
+                    </a>
+
+                    <a asp-page=".\Delete"
+                        asp-route-id="@item.InventoryItemId">
+                            Delete
                     </a>
                 </td>
             </tr>

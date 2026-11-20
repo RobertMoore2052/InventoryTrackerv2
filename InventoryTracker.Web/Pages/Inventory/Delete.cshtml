@@ -1,0 +1,42 @@
+﻿@page "{id:int}"
+@model InventoryTracker.Web.Pages.Inventory.DeleteModel
+
+@{
+    ViewData["Title"] = "Delete Inventory Item";
+}
+
+<h1>Delete Inventory Item</h1>
+
+@if (Model.InventoryItem != null)
+{
+    <div class="alert alert-warning">
+        Are you sure you want to delete this item?
+    </div>
+
+    <d1 class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.Name</dd>
+
+        <dt class="col-sm-3">Category</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.CategoryName</dd>
+
+        <dt class="col-sm-3">Quantity</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.Quantity</dd>
+    </d1>
+
+    <form method="post">
+        <input type="hidden"
+            name="id"
+            value="@Model.InventoryItem.InventoryItemId" />
+
+            <button type="submit"
+                class="btn btn-danger">
+                    Delete
+            </button>
+
+            <a asp-page="./Index"
+                class="btn btn-secondary">
+                    Cancel
+            </a>
+    </form>
+}

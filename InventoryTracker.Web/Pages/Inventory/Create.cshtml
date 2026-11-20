@@ -1,0 +1,62 @@
+﻿@page
+@model InventoryTracker.Web.Pages.Inventory.CreateModel
+
+@{
+    ViewData["Title"] = "Create Inventory Item";
+}
+
+<h1>Create Inventory Item</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly"
+        class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="InventoryItem.Name" class="form-label"></label>
+        <input asp-for="InventoryItem.Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="InventoryItem.Description" class="form-label"></label>
+        <input asp-for="InventoryItem.Description" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="InventoryItem.Quantity" class="form-label"></label>
+        <input asp-for="InventoryItem.Quantity" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="InventoryItem.ReorderLevel" class="form-label"></label>
+        <input asp-for="InventoryItem.ReorderLevel" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="InventoryItem.CategoryId" class="form-label">
+            Category
+        </label>
+
+        <select asp-for="InventoryItem.CategoryId" class="form-select">
+            <option value="">-- Select Category --</option>
+
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.CategoryId">
+                    @category.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="InventoryItem.IsActive" class="form-check-input" />
+        <label asp-for="InventoryItem.IsActive" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Create
+    </button>
+
+    <a asp-page="./Index" class="btn btn-secondary">
+        Cancel</a>
+</form>

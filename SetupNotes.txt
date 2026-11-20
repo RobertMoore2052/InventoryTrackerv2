@@ -447,6 +447,40 @@ SORTED BY NAME
 		* In Details.cshtml, start route with:
 			@page "{id:int}"	(This makes url /Inventory/Details/12)
 																	| = id
+			-then add the rest of the information:
+
+			@model InventoryTracker.Web.Pages.Inventory.DetailsModel
+
+			@{
+				ViewData["Title"] = "Inventory Details";
+			}
+
+			<h1>InventoryDetails</h1>
+
+			@if (Model.InventoryItem != null)
+			{
+				<d1 class="row">
+					<dt class="col-sm-3">Name</dt>
+					<dd class="col-sm-9">@Model.InventoryItem.Name</dd>
+
+					<dt class="col-sm-3">Description</dt>
+					<dd class="col-sm-9">@Model.InventoryItem.Description</dd>
+
+					<dt class="col-sm-3">Quantity</dt>
+					<dd class="col-sm-9">@Model.InventoryItem.Quantity</dd>
+
+					<dt class="col-sm-3">Reorder Level</dt>
+					<dd class="col-sm-9">@Model.InventoryItem.ReorderLevel</dd>
+
+					<dt class="col-sm-3">Active</dt>
+					<dd class="col-sm-9">@Model.InventoryItem.IsActive</dd>
+				</d1>
+
+				<a asp-page="./Index" class="btn btn-secondary">
+					Back to Inventory
+				</a>
+			}
+
 		* In Details.cshtml.cs:
 			using InventoryTracker.Web.Models;
 			using Microsoft.AspNetCore.Mvc;
@@ -468,11 +502,22 @@ SORTED BY NAME
 
     			public async Task<IActionResult> OnGetAsync(int id)
     			{
-     			   var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
+     			   var client = 
+					_httpClientFactory.CreateClient("InventoryTrackerApi");
+
+					var response = await client.GetAsync(
+						$"api/InventoryItems/{id}");
+
+					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+					{
+						return NotFound();
+					}
+
+					response.EnsureSuccessStatusCode();
         
      			   InventoryItem = 
-     			       await client.GetFromJsonAsync<InventoryItemViewModel>(
-     			           $"api/InventoryItem/{id}");
+     			       await response.Content
+						.ReadFromJsonAsync<InventoryItemViewModel>();
 
      			   if (InventoryItem == null)
      			   {
@@ -505,3 +550,681 @@ SORTED BY NAME
 					/Inventory/Details/{InventoryItemId}
 				because your Details.cshtml contains:
 					@page "{id:int}"
+
+		* CREATE INVENTORY ITEM
+			-Create InventoryTracker.Web/Models/CreateInventoryItemViewModel.cs
+
+			namespace InventoryTracker.Web.Models;
+
+			public class CreateInventoryItemViewModel
+			{
+				public string Name { get; set; } = "";
+				public string? Description { get; set; }
+				public int Quantity { get; set; }
+				public int ReorderLevel { get; set; }
+				public bool IsActive { get; set; } = true;
+				public int CategoryId { get; set; }
+			}
+
+			* NOTE: This deliberately matches the shape expected by your API's
+				CreateInventoryItemDto
+
+			- Also, create InventoryTracker.Web/Models/CategoryViewModel.cs
+
+			namespace InventoryTracker.Web.Models;
+
+			public class CategoryViewModel
+			{
+				public int CategoryId { get; set; }
+				public string Name { get; set; } = "";
+				public int InventoryItemCount { get; set; }
+			}
+
+		* Build the pages
+			- Create Pages/Inventory/Create.cshtml
+				and Create.cshtml.cs
+
+			- Start with code-behind (Create.cshtml.cs)
+				-
+					using InventoryTracker.Web.Models;
+					using Microsoft.AspNetCore.Mvc;
+					using Microsoft.AspNetCore.Mvc.RazorPages;
+					using System.Net.Http.Json;
+
+					namespace InventoryTracker.Web.Pages.Inventory;
+
+					public class CreateModel : PageModel
+					{
+    					private readonly IHttpClientFactory _httpClientFactory;
+
+    					[BindProperty]
+    					public CreateInventoryItemViewModel InventoryItem { get; set; } = new();
+
+    					public List<CategoryViewModel> Categories { get; set; } = [];
+
+    					public CreateModel(IHttpClientFactory httpClientFactory)
+    					{
+        					_httpClientFactory = httpClientFactory;
+    					}
+
+    					public async Task OnGetAsync()
+    					{
+        					var client =
+            					_httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        					Categories =
+            					await client.GetFromJsonAsync<List<CategoryViewModel>>(
+                					"api/Categories")
+            					?? [];
+    					}
+					}
+
+			-	[BindProperty]
+				public CreateInventoryViewModel InventoryItem { get; set; } = new();
+					- means "When the user submits the form, take the submitted
+						form values and bind them into this C# object."
+				- so later:
+					- form field: Name
+						-> InventoryItem.Name
+					- etc.
+					- And public List<CategoryViewModel> Categories { get; set; } = [];
+				- holds the category choices for the dropdown.
+
+			- OnGetAsync() runs when the user first opens:
+				- /Inventory/Create
+			- and performs:
+				- GET /api/Categories
+					-> JSON
+					-> List<CategoryViewModel>
+					-> dropdown choices
+
+		* Next, build the Create.cshtml form
+			- @page
+			@model InventoryTracker.Web.Pages.Inventory.CreateModel
+
+			@{
+    			ViewData["Title"] = "Create Inventory Item";
+			}
+
+			<h1>Create Inventory Item</h1>
+
+			<form method="post">
+    			<div class="mb-3">
+			        <label asp-for="InventoryItem.Name" class="form-label"></label>
+			        <input asp-for="InventoryItem.Name" class="form-control" />
+ 			   </div>
+
+ 			   <div class="mb-3">
+        <label asp-for="InventoryItem.Description" class="form-label"></label>
+        <input asp-for="InventoryItem.Description" class="form-control" />
+    			</div>
+
+    			<div class="mb-3">
+        			<label asp-for="InventoryItem.Quantity" class="form-label"></label>
+        			<input asp-for="InventoryItem.Quantity" class="form-control" />
+   			 </div>
+
+    			<div class="mb-3">
+       			 <label asp-for="InventoryItem.ReorderLevel" class="form-label"></label>
+        			<input asp-for="InventoryItem.ReorderLevel" class="form-control" />
+   			 </div>
+
+    			<div class="mb-3">
+     			   <label asp-for="InventoryItem.CategoryId" class="form-label">
+       			     Category
+      			  </label>
+
+      			  <select asp-for="InventoryItem.CategoryId" class="form-select">
+       			     <option value="">-- Select Category --</option>
+
+        			    @foreach (var category in Model.Categories)
+        			    {
+          			      <option value="@category.CategoryId">
+           			         @category.Name
+             			   </option>
+          			  }
+      			  </select>
+   			 </div>
+
+			 <div class="form-check mb-3">
+				<input asp-for="InventoryItem.IsActive" class="form-check-input" />
+				<label asp-for="InventoryItem.IsActive" class="form-check-label"></label>
+			 </div>
+
+   			 <button type="submit" class="btn btn-primary">
+    			    Create
+   			 </button>
+
+   			 <a asp-page="./Index" class="btn btn-secondary">
+    			    Cancel</a>
+			</form>
+
+		- What each piece does:
+			- <form method="post">
+				- means submitting the form will trigger:
+					- OnPostAsync()
+				- in Create.cshtml.cs
+			
+			- asp-for="InventoryItem.Name"
+				- connects the HTML input directly to:
+					- InventoryItem.Name
+				- through the [BindProperty]
+
+			- <select asp-for="InventoryItem.CategoryId">
+				- means the selected category ID will be placed into:
+					-  InventoryItem.CategoryId
+				- even though te user sees readable names like:
+					- Hardware
+					- Networking
+					- Storage
+					- Accessories
+				
+		* Complete the other half of the Create page, through Create.cshtml.cs
+			-	public async Task<IActionResult> OnPostAsync()
+				{
+        				var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        				var response = await client.PostAsJsonAsync(
+           				 "api/InventoryItems",
+           				 InventoryItem);
+
+        				if (!response.IsSuccessStatusCode)
+       				 {
+         				   Categories =
+          				      await client.GetFromJsonAsync<List<CategoryViewModel>>(
+         				           "api/Categories")
+         				       ?? [];
+
+         				   ModelState.AddModelError(
+          				      string.Empty,
+           				     "Unable to create inventory item.");
+
+        				    return Page();
+       				 }
+
+      				  return RedirectToPage("./Index");
+   				 }
+
+			- What new pieces do:
+				- await client.PostAsJsonAsync(
+					"api/InventoryItems",
+					InventoryItem);
+				- does 2 things:
+					1. Your API receives that JSON as its: CreateInventoryItemDto
+					2. Then, the API performs the work you already built:
+						- DTO
+							-> InventoryItem entity
+							-> Add()
+							-> SaveChangesAsync()
+							-> 201 Created
+
+				- If the API rejects the request and we do: 
+					- return Page();
+				- the Razor page renders again...
+					-BUT OnGetAsync() does not run during a POSTT.
+				- So this:
+					Categories = ...
+				- must be populated again or your category dropdown would come back
+					empty.
+
+		* Add validation output to the form:
+			- near the top of Create.cshtml, inside the <form>, add:
+				- <div asp-validation-summary="ModelOnly"
+					class="text-danger"></div>
+			* That gives this line:
+				- ModelState.AddModelError(...)
+			- somewhere to display its message.
+
+		* TEST
+			- Go to:
+				-/Inventory/Create
+
+			- Create something:
+				- Name: HDMI Adapter
+				- Description: USB-C to HDMI adapter
+				- Quantity: 5
+				- Reorder Leve: 2
+				- Category: Accessories
+				- Active: checked
+				
+			- You should see this flow:
+				-Submit
+					-> API returns 201
+					-> Web redirects to /Inventory
+					-> new item appears in the table
+
+	* BEGIN ADDING SHORTCUTS/NAVIGATION LINKS
+		- In ".Web/Pages/Shared/_Layout.cshtml", there is a navigation links section.
+			- Change that to:
+				- <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark"
+                                asp-page="/Index">
+                                Home
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark"
+                                asp-page="/Inventory/Index">
+                                Inventory
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark"
+                                asp-page="/Inventory/Create">
+                                Add Item
+                            </a>
+                        </li>
+                    </ul>
+
+		* EDIT INVENTORY ITEM
+			- Create ".Web/Models/EditInventoryItemViewModel.cs"
+				-	namespace InventoryTracker.Web.Models;
+
+					public class EditInventoryItemViewModel
+					{
+    					public int InventoryItemId { get; set; }
+    					public string Name { get; set; } = "";
+    					public string? Description { get; set; }
+    					public int Quantity { get; set; }
+    					public int ReorderLevel { get; set; }
+    					public bool IsActive { get; set; }
+    					public int CategoryId { get; set; }
+					}
+
+			- Create the Razor Page
+				- Add:
+					- Pages/Inventory/Edit.cshtml
+					- Pages/Inventory/Edit.cshtml.cs
+				- Make page route:
+					- @page "{id:int}"
+						* so pages look like /Inventory/Edit/12
+
+			- Update Edit.cshtml.cs
+				-	using INvenotryTracker.Web.Models;
+					using InventoryTracker.Web.Models;
+					using Microsoft.AspNetCore.Mvc;
+					using Microsoft.AspNetCore.Mvc.RazorPages;
+					using System.Net.Http.Json;
+
+					namespace InventoryTracker.Web.Pages.Inventory;
+
+					public class EditModel : PageModel
+					{
+   					 private readonly IHttpClientFactory _httpClientFactory;
+
+    					[BindProperty]
+    					public EditInventoryItemViewModel InventoryItem { get; set; } = new();
+
+    					public List<CategoryViewModel> Categories { get; set; } = [];
+    
+    					public EditModel(IHttpClientFactory httpClientFactory)
+    					{
+     					   _httpClientFactory = httpClientFactory;
+    					}
+
+    					public async Task<IActionResult> OnGetAsync(int id)
+    					{
+      					  var client =
+       					     _httpClientFactory.CreateClient("InventoryTrackerApi");
+
+     					   var response = await client.GetAsync(
+      					      $"api/InventoryItems/{id}");
+
+      					  if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+						{
+       					     return NotFound();
+      					  }
+
+      					  response.EnsureSuccessStatusCode();
+
+      					  var item =
+      					      await response.Content
+      					          .ReafdFromJsonAsync<InventoryItemViewModel>();
+
+     					   if (item == null)
+        					{
+        					    return NotFound();
+       					 }
+
+        					InventoryItem = new EditInventoryItemViewModel
+       					 {
+       					     InventoryItemId = item.InventoryItemId,
+       					     Name = item.Name,
+       					     Description = item.Description,
+        					    Quantity = item.Quantity,
+        					    ReorderLevel = item.ReorderLevel,
+        					    IsActive = item.IsActive,
+         					   CategoryId = item.CategoryId
+       					 };
+
+     					   Categories =
+     					       await client.GetFromJsonAsync<List<CategoryViewModel>>(
+     					           "api/Categories")
+     					       ?? [];
+
+   							return Page();
+  						}
+					}
+
+			* Build Edit.cshtml
+				-	@page "{id:int}"
+					@model InventoryTracker.Web.Pages.Inventory.EditModel
+
+					@{
+    					ViewData["Title"] = "Edit Inventory Item";
+					}
+
+					<h1>Edit Inventory Item</h1>
+
+					<form method="post">
+    					<input type="hidden"
+       						asp-for="InventoryItem.InventoryItemId" />
+
+        					<div class="mb-3">
+            					<label asp-for="InventoryItem.Name"
+                        					class="form-label"></label>
+            					<input asp-for="InventoryItem.Name"
+                        					class="form-control" />
+        					</div>
+
+        					<div class="mb-3">
+            					<label asp-for="InventoryItem.Description"
+                        					class="form-label"></label>
+            					<textarea asp-for="InventoryItem.Description"
+                        					class="form-control"></textarea>
+        					</div>
+
+        					<div class="mb-3">
+            					<label asp-for="InventoryItem.ReorderLevel"
+                        					class="form-label"></label>
+            					<input asp-for="InventoryItem.ReorderLevel"
+                        class="form-control" />
+        					</div>
+
+       						<div class="mb-3">
+            					<label asp-for="InventoryItem.CategoryId"
+                        					class="form-select">
+                    					Category
+                					</label>
+
+                					<select asp-for="InventoryItem.CategoryId"
+                        					class="form-select">
+                    					@foreach (var category in Model.Categories)
+                    					{
+                        					<option value="@category.CategoryId">
+                            					@category.Name
+                        					</option>
+                    					}
+                					</select>
+        					</div>
+
+        					<div class="form-check mb-3">
+            					<input asp-for="InventoryItem.IsActive"
+                   						class="form-check-input" />
+
+            					<label asp-for="InventoryItem.IsActive"
+                    					class="form-check-label">
+                					Active
+            					</label>
+        					</div>
+
+        					<button type="submit"
+                    					class="btn btn-primary">
+                					Save Changes
+        					</button>
+
+       						 <a asp-page="./Index"
+                					class="btn btn-secondary">
+            					Cancel
+        					</a>
+					</form>
+
+
+			* Add to: Edit.cshtml.cs
+				-	using InventoryTracker.Web.Models;
+					using InventoryTracker.Web.Models;
+					using Microsoft.AspNetCore.Mvc;
+					using Microsoft.AspNetCore.Mvc.RazorPages;
+					using System.Net.Http.Json;
+
+					namespace InventoryTracker.Web.Pages.Inventory;
+
+					public class EditModel : PageModel
+					{
+					    private readonly IHttpClientFactory _httpClientFactory;
+
+					    [BindProperty]
+					    public EditInventoryItemViewModel InventoryItem { get; set; } = new();
+
+					    public List<CategoryViewModel> Categories { get; set; } = [];
+    
+					    public EditModel(IHttpClientFactory httpClientFactory)
+					    {
+        					_httpClientFactory = httpClientFactory;
+    					}
+
+    					public async Task<IActionResult> OnGetAsync(int id)
+    					{
+        					var client =
+            					_httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        					var response = await client.GetAsync(
+            					$"api/InventoryItems/{id}");
+
+        					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        					{
+            					return NotFound();
+        					}
+
+        					response.EnsureSuccessStatusCode();
+
+        					var item =
+            					await response.Content
+                					.ReadFromJsonAsync<InventoryItemViewModel>();
+
+        					if (item == null)
+        					{
+            					return NotFound();
+        					}
+
+        					InventoryItem = new EditInventoryItemViewModel
+        					{
+            					InventoryItemId = item.InventoryItemId,
+            					Name = item.Name,
+            					Description = item.Description,
+            					Quantity = item.Quantity,
+            					ReorderLevel = item.ReorderLevel,
+            					IsActive = item.IsActive,
+            					CategoryId = item.CategoryId
+        					};
+
+        					Categories =
+            					await client.GetFromJsonAsync<List<CategoryViewModel>>(
+                					"api/Categories")
+            					?? [];
+
+        					return Page();
+    					}
+
+    					public async Task<IActionResult> OnPostSync()
+    					{
+        					var client =
+            					_httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        					var response = await client.PutAsJsonAsync(
+            					$"api/InventoryItems/{InventoryItem.InventoryItemId}",
+            					InventoryItem);
+
+        					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        					{
+            					return NotFound();
+        					}
+
+        					if (!response.IsSuccessStatusCode)
+        					{
+            					Categories =
+                					await client.GetFromJsonAsync<List<CategoryViewModel>>(
+                    					"api/Categories")
+                					?? [];
+
+            					ModelState.AddModelError(
+                					string.Empty,
+                					"Unable to update inventory item.");
+
+            					return Page();
+        					}
+
+        					return RedirectToPage("/Index");
+    					}
+					}
+
+			* Add Validation Output
+				- near top of Edit.cshtml, add:
+					-	<div asp-validation-summary="ModelOnly"
+							class="text-danger"></div>
+
+			* Add the Edit option to Inventory>Index.cshtml
+				- Below the Details options, add:
+					-	<a asp-page=".\Edit"
+								asp-route-id="@item.InventoryItemId">
+							Edit
+						</a>
+
+		* Create the Delete Option
+			- Create:
+				- Pages/Inventory/Delete.cshtml
+				- Pages/Inventory/Delete.cshtml.cs
+
+			- In Delete.cshtml.cs:
+				- add: @page "{id:int}"
+
+				- add:
+					-	using InventoryTracker.Web.Models;
+						using Microsoft.AspNetCore.Mvc;
+						using Microsoft.AspNetCore.Mvc.RazorPages;
+						using System.Net.Http.Json;
+
+						namespace InventoryTracker.Web.Pages.Inventory;
+
+						public class DeleteModel : PageModel
+						{
+    						private readonly IHttpClientFactory _httpClientFactory;
+
+    						public InventoryItemViewModel? InventoryItem { get; set; }
+
+    						public DeleteModel(IHttpClientFactory httpClientFactory)
+    						{
+        						_httpClientFactory = httpClientFactory;
+    						}
+
+    						public async Task<IActionResult> OnGetAsync(int id)
+    						{
+        						var client =
+            						_httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        						var response = await client.GetAsync(
+            						$"api/InventoryItems/{id}");
+
+        						if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        						{
+            						return NotFound();
+        						}
+
+        						response.EnsureSuccessStatusCode();
+
+        						InventoryItem =
+            						await response.Content
+                						.ReadFromJsonAsync<InventoryItemViewModel>();
+
+        						if (InventoryItem == null)
+        						{
+            						return NotFound();
+        						}
+
+        						return Page();
+    						}
+						}
+
+				- In Delete.cshtml:
+					-	@page "{id:int}"
+						@model InventoryTracker.Web.Pages.Inventory.DeleteModel
+
+						@{
+    						ViewData["Title"] = "Delete Inventory Item";
+						}
+
+						<h1>Delete Inventory Item</h1>
+
+						@if (Model.InventoryItem != null)
+						{
+    						<div class="alert alert-warning">
+        						Are you sure you want to delete this item?
+    						</div>
+
+    						<d1 class="row">
+        						<dt class="col-sm-3">Name</dt>
+        						<dd class="col-sm-9">@Model.InventoryItem.Name</dd>
+
+        						<dt class="col-sm-3">Category</dt>
+        						<dd class="col-sm-9">@Model.InventoryItem.CategoryName</dd>
+
+        						<dt class="col-sm-3">Quantity</dt>
+        						<dd class="col-sm-9">@Model.InventoryItem.Quantity</dd>
+    						</d1>
+
+    						<form method="post">
+        						<input type="hidden"
+            						name="id"
+            						value="@Model.InventoryItem.InventoryItemId" />
+
+            						<button type="submit"
+                						class="btn btn-danger">
+                    						Delete
+            						</button>
+
+            						<a asp-page="./Index"
+                						class="btn btn-secondary">
+                    						Cancel
+            						</a>
+    						</form>
+						}
+				
+				- In Delete.cshtml.cs:
+					-	public async Task<IActionResult> OnPostAsync(int id)
+						{
+							var client =
+            						_httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        						var response = await client.DeleteAsync(
+            						$"api/InventoryItems/{id}");
+
+        						if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        						{
+            						return NotFound();
+        						}
+
+        						if (!response.IsSuccessStatusCode)
+        						{
+            						ModelState.AddModelError(
+                						string.Empty,
+                						"Unable to delete inventory item.");
+
+            						return Page();
+        						}
+
+        						return RedirectToPage("./Index");
+    						}
+
+				- Add Delete to the Inventory list
+					- In Inventory/Index.cshtml:
+						- Add:
+							-	<a asp-page="./Delete"
+									asp-route-id="@item.InventoryItemId">
+										Delete
+								</a>
+
+			* Categories page
+				- 

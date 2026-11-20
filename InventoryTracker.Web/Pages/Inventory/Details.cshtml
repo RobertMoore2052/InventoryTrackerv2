@@ -1,4 +1,32 @@
 ﻿@page "{id:int}"
 @model InventoryTracker.Web.Pages.Inventory.DetailsModel
+
 @{
+    ViewData["Title"] = "Inventory Details";
+}
+
+<h1>Inventory Details</h1>
+
+@if (Model.InventoryItem != null)
+{
+    <d1 class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.Name</dd>
+        
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.Description</dd>
+
+        <dt class="col-sm-3">Quantity</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.Quantity</dd>
+
+        <dt class="col-sm-3">Reorder Level</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.ReorderLevel</dd>
+
+        <dt class="col-sm-3">Active</dt>
+        <dd class="col-sm-9">@Model.InventoryItem.IsActive</dd>
+    </d1>
+
+    <a asp-page="./Index" class="btn btn-secondary">
+        Back to Inventory
+    </a>
 }

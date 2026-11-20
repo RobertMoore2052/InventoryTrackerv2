@@ -1,0 +1,74 @@
+﻿@page "{id:int}"
+@model InventoryTracker.Web.Pages.Inventory.EditModel
+
+@{
+    ViewData["Title"] = "Edit Inventory Item";
+}
+
+<h1>Edit Inventory Item</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly"
+        class="text-danger"></div>
+
+    <input type="hidden"
+        asp-for="InventoryItem.InventoryItemId" />
+
+        <div class="mb-3">
+            <label asp-for="InventoryItem.Name"
+                        class="form-label"></label>
+            <input asp-for="InventoryItem.Name"
+                        class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="InventoryItem.Description"
+                        class="form-label"></label>
+            <textarea asp-for="InventoryItem.Description"
+                        class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="InventoryItem.ReorderLevel"
+                        class="form-label"></label>
+            <input asp-for="InventoryItem.ReorderLevel"
+                        class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="InventoryItem.CategoryId"
+                        class="form-label">
+                    Category
+                </label>
+
+                <select asp-for="InventoryItem.CategoryId"
+                        class="form-select">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.CategoryId">
+                            @category.Name
+                        </option>
+                    }
+                </select>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="InventoryItem.IsActive"
+                    class="form-check-input" />
+
+            <label asp-for="InventoryItem.IsActive"
+                    class="form-check-label">
+                Active
+            </label>
+        </div>
+
+        <button type="submit"
+                    class="btn btn-primary">
+                Save Changes
+        </button>
+
+        <a asp-page="./Index"
+                class="btn btn-secondary">
+            Cancel
+        </a>
+</form>
