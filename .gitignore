@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Personal notes file
+SetupNotes.txt
+
 # dotenv files
 .env
 
