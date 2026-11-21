@@ -16,6 +16,8 @@
             <th>Reorder Level</th>
             <th>Active</th>
             <th></th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
 
@@ -33,13 +35,15 @@
                         asp-route-id="@item.InventoryItemId">
                             Details
                     </a>
-
-                    <a asp-page=".\Edit"
+                </td>
+                <td>
+                    <a asp-page="./Edit"
                         asp-route-id="@item.InventoryItemId">
                             Edit
                     </a>
-
-                    <a asp-page=".\Delete"
+                </td>
+                <td>
+                    <a asp-page="./Delete"
                         asp-route-id="@item.InventoryItemId">
                             Delete
                     </a>

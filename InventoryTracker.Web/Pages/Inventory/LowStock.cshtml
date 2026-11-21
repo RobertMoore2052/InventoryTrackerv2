@@ -1,0 +1,47 @@
+﻿@page
+@model InventoryTracker.Web.Pages.Inventory.LowStockModel
+
+@{
+    ViewData["Title"] = "Low Stock";
+}
+
+<h1>Low Stock</h1>
+
+@if (Model.InventoryItems.Count == 0)
+{
+    <div class="alert alert-success">
+        No active inventory items are currently low on stock.
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Reorder Level</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.InventoryItems)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.CategoryName</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.ReorderLevel</td>
+                    <td>
+                        <a asp-page="./Details"
+                                asp-route-id="@item.InventoryItemId">
+                            Details
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

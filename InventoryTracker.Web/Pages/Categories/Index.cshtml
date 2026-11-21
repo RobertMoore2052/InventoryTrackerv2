@@ -16,6 +16,8 @@
         <tr>
             <th>Name</th>
             <th>Inventory Items</th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
 
@@ -26,9 +28,15 @@
                 <td>@category.Name</td>
                 <td>@category.InventoryItemCount</td>
                 <td>
-                    <a asp-page=".\Edit"
+                    <a asp-page="./Edit"
                             asp-route-id="@category.CategoryId">
                         Edit
+                    </a>
+                </td>
+                <td>
+                    <a asp-page="./Delete"
+                            asp-route-id="@category.CategoryId">
+                        Delete
                     </a>
                 </td>
             </tr>

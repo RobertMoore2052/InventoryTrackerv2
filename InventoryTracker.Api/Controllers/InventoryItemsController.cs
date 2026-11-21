@@ -167,7 +167,7 @@ namespace InventoryTracker.Api.Controllers
             var items = await _context.InventoryItems
                 .Where(item =>
                     item.IsActive &&
-                    item.Quantity >= item.ReorderLevel)
+                    item.Quantity <= item.ReorderLevel)
                 .OrderBy(item => item.Quantity)
                 .Select(item => new InventoryItemDto
                 {

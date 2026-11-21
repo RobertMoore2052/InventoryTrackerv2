@@ -1,0 +1,39 @@
+﻿@page "{id:int}"
+@model InventoryTracker.Web.Pages.Categories.DeleteModel
+
+@{
+    ViewData["Title"] = "Delete Category";
+}
+
+<h1>Delete Category</h1>
+
+@if (Model.Category != null)
+{
+    <div asp-validation-summary="ModelOnly"
+        class="text-danger"></div>
+
+    <div class="alert alert-warning">
+        Are you sure you want to delete this category?
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.Category.Name</dd>
+    </dl>
+
+    <form method="post">
+        <input type="hidden"
+            name="id"
+            value="@Model.Category.CategoryId" />
+
+        <button type="submit"
+                class="btn btn-danger">
+            Delete
+        </button>
+
+        <a asp-page="./Index"
+                class="btn btn-secondary">
+            Cancel
+        </a>
+    </form>
+}
