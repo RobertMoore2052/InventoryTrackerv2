@@ -58,4 +58,16 @@ public class CustomWebApplicationFactory
 
         return host;
     }
+
+    public void ResetDatabase()
+    {
+        using var scope = Services.CreateScope();
+
+        var context =
+            scope.ServiceProvider
+                .GetRequiredService<InventoryTrackerDbContext>();
+
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
+    }
 }
