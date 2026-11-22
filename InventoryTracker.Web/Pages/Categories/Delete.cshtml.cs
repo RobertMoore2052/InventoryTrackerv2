@@ -58,18 +58,24 @@ public class DeleteModel : PageModel
 
         if (!response.IsSuccessStatusCode)
         {
-            var categoryResponse = await client.GetAsync(
-                $"api/Categories/{id}");
+            var errorMessage =
+                await response.Content.ReadAsStringAsync();
+
+            var categoryResponse =
+                await client.GetAsync($"api/Categories/{id}");
 
             if (categoryResponse.IsSuccessStatusCode)
             {
-                Category = await categoryResponse.Content
-                    .ReadFromJsonAsync<CategoryViewModel>();
+                Category =
+                    await categoryResponse.Content
+                        .ReadFromJsonAsync<CategoryViewModel>();
             }
 
             ModelState.AddModelError(
                 string.Empty,
-                "Unable to delete category. Make sure it contains no inventory items.");
+                string.IsNullOrWhiteSpace(errorMessage)
+                    ? "Unable to delete category."
+                    : errorMessage);
 
             return Page();
         }

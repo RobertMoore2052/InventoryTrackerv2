@@ -52,6 +52,9 @@ public class CreateModel : PageModel
 
         if (!response.IsSuccessStatusCode)
         {
+            var errorMessage =
+                await response.Content.ReadAsStringAsync();
+
             Categories =
                 await client.GetFromJsonAsync<List<CategoryViewModel>>(
                     "api/Categories")
@@ -59,7 +62,9 @@ public class CreateModel : PageModel
 
             ModelState.AddModelError(
                 string.Empty,
-                "Unable to create inventory item.");
+                string.IsNullOrWhiteSpace(errorMessage)
+                    ? "Unable to create inventory item."
+                    : errorMessage);
 
             return Page();
         }

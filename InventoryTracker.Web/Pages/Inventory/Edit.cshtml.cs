@@ -88,7 +88,8 @@ public class EditModel : PageModel
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
+            var errorMessage =
+                await response.Content.ReadAsStringAsync();
 
             Categories =
                 await client.GetFromJsonAsync<List<CategoryViewModel>>(
@@ -97,7 +98,9 @@ public class EditModel : PageModel
 
             ModelState.AddModelError(
                 string.Empty,
-                $"Unable to update inventory item. Status: {(int)response.StatusCode}. {error}");
+                string.IsNullOrWhiteSpace(errorMessage)
+                    ? "Unable to update inventory item." 
+                    : errorMessage);
 
             return Page();
         }
