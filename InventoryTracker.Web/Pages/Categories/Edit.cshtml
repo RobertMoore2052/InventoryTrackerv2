@@ -18,7 +18,9 @@
             <label asp-for="Category.Name"
                 class="form-label"></label>
             <input asp-for="Category.Name"
-                    class="form-control" />
+                class="form-control" />
+            <span asp-validation-for="Category.Name"
+                class="text-danger"></span>
         </div>
 
         <button type="submit"

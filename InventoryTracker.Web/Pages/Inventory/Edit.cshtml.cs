@@ -67,6 +67,16 @@ public class EditModel : PageModel
         var client =
             _httpClientFactory.CreateClient("InventoryTrackerApi");
 
+        if (!ModelState.IsValid)
+        {
+            Categories =
+                await client.GetFromJsonAsync<List<CategoryViewModel>>(
+                    "api/Categories")
+                ?? [];
+
+            return Page();
+        }
+
         var response = await client.PutAsJsonAsync(
             $"api/InventoryItems/{InventoryItem.InventoryItemId}",
             InventoryItem);

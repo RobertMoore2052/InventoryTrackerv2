@@ -2,6 +2,7 @@ using InventoryTracker.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 
 namespace InventoryTracker.Web.Pages.Inventory;
 
@@ -32,7 +33,18 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
+        var client =
+            _httpClientFactory.CreateClient("InventoryTrackerApi");
+
+        if (!ModelState.IsValid)
+        {
+            Categories =
+                await client.GetFromJsonAsync<List<CategoryViewModel>>(
+                    "api/Categories")
+                ?? [];
+
+            return Page();
+        }
 
         var response = await client.PostAsJsonAsync(
             "api/InventoryItems",

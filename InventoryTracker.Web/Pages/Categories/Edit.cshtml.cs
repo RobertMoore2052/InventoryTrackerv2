@@ -52,6 +52,11 @@ public class EditModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
         var client =
             _httpClientFactory.CreateClient("InventoryTrackerApi");
 

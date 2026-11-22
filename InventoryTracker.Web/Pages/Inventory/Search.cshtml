@@ -1,0 +1,65 @@
+﻿@page
+@model InventoryTracker.Web.Pages.Inventory.SearchModel
+
+@{
+    ViewData["Title"] = "Search Inventory";
+}
+
+<h1>Search Inventory</h1>
+
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input asp-for="Term"
+            class="form-control"
+            placeholder="Search inventory..." />
+
+        <button type="submit"
+                class="btn btn-primary">
+            Search
+        </button>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Term))
+{
+    <h2>Results</h2>
+
+    @if (Model.InventoryItems.Count == 0)
+    {
+        <div class="alert alert-info">
+            No inventory items matched your search.
+        </div>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Active</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model.InventoryItems)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.IsActive</td>
+                        <td>
+                            <a asp-page="./Details"
+                                asp-route-id="@item.InventoryItemId">
+                                    Details
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}

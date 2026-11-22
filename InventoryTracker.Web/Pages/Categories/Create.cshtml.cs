@@ -19,6 +19,11 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
         var client = _httpClientFactory.CreateClient("InventoryTrackerApi");
 
         var response = await client.PostAsJsonAsync(

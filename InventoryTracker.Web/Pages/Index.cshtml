@@ -1,10 +1,80 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h1>Inventory Dashboard</h1>
+
+<div class="row mt-4">
+    <div class="col mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Inventory</h5>
+                <p class="display-6">
+                    @Model.Dashboard.TotalInventoryItems
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Active Items</h5>
+                <p class="display-6">
+                    @Model.Dashboard.ActiveInventoryItems
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Low Stock</h5>
+                <p class="display-6">
+                    @Model.Dashboard.LowStockItems
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Categories</h5>
+                <p class="display-6">
+                    @Model.Dashboard.TotalCategories
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-page="/Inventory/Index"
+       class="btn btn-primary">
+        View Inventory
+    </a>
+    
+    <a asp-page="/Inventory/Create"
+       class="btn btn-primary">
+        Add Item
+    </a>
+
+    <a asp-page="/Inventory/LowStock"
+       class="btn btn-primary">
+        Low Stock
+    </a>
+
+    <a asp-page="/Inventory/Search"
+       class="btn btn-primary">
+        Search
+    </a>
+
+    <a asp-page="/Categories/Index"
+       class="btn btn-primary">
+        Categories
+    </a>
 </div>
