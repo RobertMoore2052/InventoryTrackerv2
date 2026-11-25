@@ -248,7 +248,59 @@ dotnet ef database update --project InventoryTracker.Data --startup-project Inve
 
 A newly initialized database may be empty. Categories and inventory items can be created using the Web application after startup.
 
-### 4. Run the Application
+### 4. Database Seeding (Optional)
+
+InventoryTracker includes a configurable database seeder that populates the SQLite database with sample categories and inventory items. This allows developers to quickly evaluate the application's functionality without manually creating records.
+
+#### Enable Sample Data
+1. Ensure the database has been created and all Entity Framework Core migrations have been applied:
+```powershell
+dotnet ef database update --project InventoryTracker.Data --startup-project InventoryTracker.Api
+```
+2. Open InventoryTracker.Api/appsettings.Development.json.
+3. Set the `SeedSampleData` configuration property to true:
+```
+"SeedSampleData": true
+```
+4. Build and launch the application in the Development environment.
+
+The seeder executes automatically when the API starts.
+
+#### Sample Data
+
+The seeder provides the following sample categories and inventory items:
+|Category|InventoryItem|Quantity|Reorder Level|
+|Electronics|Wireless Mouse|25|5|
+|Electronics|Keyboard|15|5|
+|Office Supplies|Printer Paper|50|10|
+|Office Supplies|Ballpoint Pens|100|20|
+|Tools|Hammer|12|3|
+|Tools|Screwdriver Set|8|10
+
+The sample dataset includes a low-stock inventory item to demonstrate inventory reorder functionality.
+
+#### Seeding Behavior
+
+- Seeding is available only in the Development environment.
+- Existing categories are reused when their names match.
+- Duplicate sample inventory items are prevented during normal application startup.
+- Existing inventory records and quantities are preserved.
+- Missing sample records are restored when seeding is enabled.
+- No additional database migrations are required to populate sample data.
+
+#### Disable Sample Data Seeding
+
+After the sample data has been populated, set the configuration property back to false:
+```
+"SeedSampleData": false
+```
+
+Disabling the seeder does not remove existing records. It prevents the automatic restoration of sample records during subsequent application startus.
+
+Sample data seeding is disabled by default.
+
+
+### 5. Run the Application
 
 The API and Web projects must both be running. In Visual Studio:
 
