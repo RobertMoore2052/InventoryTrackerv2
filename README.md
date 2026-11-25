@@ -221,7 +221,7 @@ The root `global.json` configures Microsoft.Testing.Platform as the `dotnet test
 ### 1. Clone the Repository
 
 ```powershell
-git clone https://github.RobertMoore2052/InventoryTrackerv2.git
+git clone https://github.com/RobertMoore2052/InventoryTrackerv2.git
 cd InventoryTrackerv2
 ```
 
