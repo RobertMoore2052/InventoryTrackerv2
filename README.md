@@ -368,27 +368,41 @@ The Web application uses the configured ApiBaseUrl to communicate with the API. 
 
 ###### Dashboard
 
-*Dashboard screenshot coming soon.*
+![InventoryTracker Dashboard](docs/screenshots/dashboard.png)
 
 
 
 ###### Inventory List
 
-*Inventory list screenshot coming soon.*
+![InventoryTracker Inventory List](docs/screenshots/inventory.png)
 
 
 
 ###### Low Stock
 
-*Low-stock inventory screenshot coming soon.*
+![InventoryTracker Low Stock Page](docs/screenshots/low-stock.png)
 
 
 
-###### Create and Edit Inventory
+###### API Request/Response
 
-*Inventory form screenshot coming soon.*
+![InventoryTracker API Request/Response](docs/screenshots/api-request-response.png)
 
 
+
+###### Other Screenshots
+
+[InventoryTracker Item Details Page](docs/screenshots/item-details.png)
+
+[InventoryTracker Create Item Page](docs/screenshots/create-item.png)
+
+[InventoryTracker Categories Page](docs/screenshots/categories.png)
+
+[InventoryTracker Search Item Page](docs/screenshots/search.png)
+
+[InventoryTracker API Full Reference Page](docs/screenshots/api-full-reference.jpeg)
+
+[InventoryTracker API Overview Page](docs/screenshots/api-overview.png)
 
 
 
