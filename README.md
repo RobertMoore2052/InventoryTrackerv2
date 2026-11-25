@@ -1,463 +1,295 @@
-### InventoryTracker
+# InventoryTracker
 
+InventoryTracker is a full-stack inventory management application built with C# and .NET 10. It provides a web interface for managing inventory items and categories, monitoring stock levels, and searching inventory.
 
+The application uses ASP.NET Core Web API, Razor Pages, Entity Framework Core, and SQLite, with separate projects for the domain, data access, API, and user interface. I built this project to gain hands-on experience designing, developing, testing, and integrating the components of a complete .NET application.
 
-InventoryTracker is a full-stack application for inventory management, built with C# and .NET 10. It assists with managing inventory, organizing/categorizing items, monitoring stock levels, and searching existing inventory, all from a central dashboard.
 
-The application uses ASP.NET Core, Entity Framework Core, SQLite, and Razor Pages. I also wanted to separate the different main functions of the application into separate projects for the domain, data access, API, and user interface. I built this project to gain hands-on experience developing a complete .NET application. I wanted to be able to incorporate skills such as database design, API development, web interfaces, and writing automated tests.
+## Features
 
+### Dashboard
 
+- View the count of the total inventory items, active inventory items, low-stock items, and categories.
 
+### Inventory and Category Management
 
+- Create, view, edit, and delete inventory items.
+- Create, view, edit, and delete categories.
+- Prevent deletion of categories that contain inventory items.
+- Track inventory quantities, reorder levels, and active status.
 
-##### Features
+### Low-Stock Monitoring and Search
 
+- Identify active inventory items whose quantity is at or below their reorder level.
+- Search inventory items by name or description, with support for `*` wildcard patterns.
+- Filter inventory by category through the REST API.
 
+### Validation and Testing
 
-###### Dashboard
+- Validate input at both the Web and API layers.
+- Provide user-facing error feedback and appropriate HTTP status codes.
+- Verify domain behavior and API functionality through automated tests.
+- Present the user interface using Razor Pages and Bootstrap.
 
-Provides a quick overview of:
 
-* Total inventory items
-* Active inventory items
-* Low-stock items
-* Total categories
+## Screenshots
 
-
-
-###### Manage/Organize Inventory
-
-* Create, view, edit, and delete inventory items
-* Create, edit, and delete categories
-
-  * Prevent deletion of categories containing inventory items
-
-
-
-
-
-###### Monitor Low-Stock Items
-
-* Track inventory quantities and reorder levels
-* Flag items that are active and are running low on stock
-
-
-
-###### Search
-
-* Search inventory items by name or description
-* Support added for \* wildcards
-
-
-
-###### Validation/Error Handling and Automated Testing
-
-* Validate user input at both the Web and API layers
-* Handle API errors
-* Automated domain and API integration tests
-
-
-
-###### Responsive Web Design
-
-* Built UI around a responsive Razor Pages interface
-
-
-
-
-
-##### Technology Stack
-
-
-
-* C#
-* .NET 10
-* ASP.NET Core Web API
-* ASP.NET Core Razor Pages
-* Entity Framework Core
-* SQLite
-* LINQ
-* xUnit
-* Microsoft.Testing.Platform
-* WebApplicationFactory
-* Bootstrap
-* Scalar API Reference
-* Git and GitHub
-
-
-
-
-
-##### Architecture
-
-
-
-The solution has clear separation between the UI, API, data access, and domain logic, splitting each into its own project. This way, each project has a specific responsibility.
-
-
-
-1. The user's browser is used to connect to the InventoryTracker.Web project, which houses the Razor Pages.
-2. Once a user triggers an action involving data, it sends an HTTP request to InventoryTracker.Api, which hosts the ASP.NET Core REST API.
-3. That API then uses Entity Framework Core through InventoryTracker.Data to read from and write to a SQLite database.
-
-
-
-The .Web project communicates with the API through HttpClient instead of accessing the database directly. This keeps database operations and business rules separate from the user interface.
-
-
-
-
-
-##### Solution Structure
-
-
-
-###### InventoryTracker.Api
-
-&#x09;REST API
-
-&#x09;Controllers
-
-&#x09;DTOs
-
-&#x09;Validation
-
-
-
-###### InventoryTracker.Console
-
-&#x09;Console application used for early
-
-&#x09;development and persistence testing
-
-
-
-###### InventoryTracker.Data
-
-&#x09;EF Core DbContext
-
-&#x09;Entity Configuration
-
-&#x09;Migrations
-
-&#x09;Database Configuration
-
-
-
-###### InventoryTracker.Domain
-
-&#x09;Domain Entities and Relationships
-
-
-
-###### InventoryTracker.Tests
-
-&#x09;Domain and API Integration Tests
-
-
-
-###### InventoryTracker.Web
-
-&#x09;Razor Pages
-
-&#x09;View Models
-
-&#x09;API Communication
-
-###### 
-
-
-
-##### API Endpoints
-
-
-
-###### Inventory Items
-
-|GET|/api/InventoryItems|
-|-|-|
-|GET|/api/InventoryItems/{id}|
-|POST|/api/InventoryItems|
-|PUT|/api/InventoryItems/{id}|
-|DELETE|/api/InventoryItems/{id}|
-|GET|/api/InventoryItems/low-stock|
-|GET|/api/InventoryItems/category/{categoryId}|
-|GET|/api/InventoryItems/category/{categoryId}/low-stock|
-|GET|/api/InventoryItems/search?term={searchTerm}|
-
-
-
-###### Categories
-
-|GET|/api/Categories|
-|-|-|
-|GET|/api/Categories/{id}|
-|POST|/api/Categories|
-|PUT|/api/Categories/{id}|
-|DELETE|/api/Categories/{id}|
-
-
-
-###### Dashboard
-
-|GET|/api/Dashboard|
-|-|-|
-
-
-
-
-
-##### Search
-
-
-
-Inventory searches match against item names and descriptions. By default, entering a search term returns items containing the supplied text. For example, the user can simply supply ***usb*** as a search term.
-
-
-
-The use of simple wildcard patterns using '**\***' is also supported. For example:
-
-|**SEARCH**|**BEHAVIOR**|
-|-|-|
-|usb|Contains "usb"|
-|usb\*|Starts with "usb"|
-|\*usb|Ends with "usb"|
-|\*usb\*|Contains "usb"|
-
-
-
-The application converts '**\*'** to the SQL '**LIKE**' wildcard '**\&'** when building the search query.
-
-
-
-
-
-##### Validation
-
-
-
-Both the Web application and API validate incoming data. Validation and business rules include:
-
-
-
-* Inventory and category names are required
-* Text fields have maximum lengths
-* Quantities must be non-negative
-* Inventory items must belong to a valid category
-* Categories containing inventory items cannot be deleted
-
-
-
-The Web interface provides feedback through error messages when users enter invalid information. The API performs its own validation to protect the database, including when requests originate outside the Web application.
-
-
-
-
-
-##### Testing
-
-
-
-I used a combination of domain and API integration tests to verify application behavior.
-
-The integration tests use xUnit, WebApplicationFactory, and temporary SQLite in-memory databases. This allows tests to send HTTP requests to the API and verify responses against an isolated database.
-
-Some of the behaviors covered include:
-
-
-
-* New inventory items default to active
-* Requests for missing inventory items return **404 Not Found**
-* Requests for existing inventory items return the expected DTO
-* Invalid category IDs return **400 Bad Request**
-* Categories containing inventory items cannot be deleted
-* Empty categories are deleted successfully
-* Requests for deleted categories return **404 Not Found**
-* The low-stock endpoint returns only active items meeting the low-stock criteria
-
-
-
-Run the test suite from the solution directory:
-
-**dotnet test**
-
-
-
-I have also followed Microsoft's current guidance regarding VSTest-based **dotnet test** command. This allows MTP test projects with .NET 10 SDK to opt-in to the MTP-based **dotnet test** and disallowing running with the VSTest-based implementation. See documentation [here](https://learn.microsoft.com/sl-si/dotnet/core/testing/microsoft-testing-platform-migration-from-v1-to-v2).
-
-
-
-
-
-##### Running Locally
-
-
-
-###### Requirements
-
-* .NET 10 SDK
-* Git
-* Visual Studio 2026 (or another .NET-compatible IDE)
-* Entity Framework Core CLI tools
-
-
-
-1. ###### Clone the Repository
-
-&#x09;***git clone https://github.com/RobertMoore2052/InventoryTrackerv2***
-
-&#x09;***cd InventoryTracker***
-
-
-
-###### 2\. Restore Dependencies and Build
-
-&#x09;***dotnet restore***
-
-&#x09;***dotnet build***
-
-
-
-###### 3\. Set Up the Database
-
-InventoryTracker uses SQLite for database storage and Entity Framework Core migrations to manage the database schema.
-
-
-
-Apply the migrations from the solution directory:
-
-&#x09;***dotnet ef database update --project InventoryTracker.Data --startup-project InventoryTracker.Api***
-
-
-
-###### 4\. Run the Application
-
-Both the API and Web projects need to be running.
-
-
-
-In Visual Studio, configure the solution to use multiple startup projects:
-
-&#x09;1. Right-click the solution and select Properties
-
-&#x09;2. Under Common Properties > Configure Startup Projects, choose the option for 'Multiple startup projects:'
-
-&#x09;3. In the boxes below, you should see each project listed. Choose the following:
-
-&#x09;	a. InventoryTracker.Api | Start | {blank}
-
-&#x09;	b. InventoryTracker.Web | Start | {blank}
-
-&#x09;4. All other option, leave 'Action' set to 'None'.
-
-
-
-Start debugging to launch both applications (green 'Start'/'https' button OR F5)
-
-
-
-The Web application uses the configured ApiBaseUrl to communicate with the API. Make sure this value matches the address of your running API instance.
-
-
-
-
-
-##### Screenshots
-
-
-
-###### Dashboard
+### Dashboard
 
 ![InventoryTracker Dashboard](docs/screenshots/dashboard.png)
 
-
-
-###### Inventory List
+### Inventory List
 
 ![InventoryTracker Inventory List](docs/screenshots/inventory.png)
 
-
-
-###### Low Stock
+### Low Stock
 
 ![InventoryTracker Low Stock Page](docs/screenshots/low-stock.png)
 
+### REST API Request and Response
+
+![InventoryTracker API Request and Response](docs/screenshots/api-request-response.png)
+
+### Additional Screenshots
+
+- [Item Details](docs/screenshots/item-details.png)
+- [Create Item](docs/screenshots/create-item.png)
+- [Categories](docs/screenshots/categories.png)
+- [Search](docs/screenshots/search.png)
+- [API Overview](docs/screenshots/api-overview.png)
+- [Full API Reference](docs/screenshots/api-full-reference.jpeg)
 
 
-###### API Request/Response
+## Technology Stack
 
-![InventoryTracker API Request/Response](docs/screenshots/api-request-response.png)
-
-
-
-###### Other Screenshots
-
-[InventoryTracker Item Details Page](docs/screenshots/item-details.png)
-
-[InventoryTracker Create Item Page](docs/screenshots/create-item.png)
-
-[InventoryTracker Categories Page](docs/screenshots/categories.png)
-
-[InventoryTracker Search Item Page](docs/screenshots/search.png)
-
-[InventoryTracker API Full Reference Page](docs/screenshots/api-full-reference.jpeg)
-
-[InventoryTracker API Overview Page](docs/screenshots/api-overview.png)
+| Area | Technologies |
+| --- | --- |
+| Language and runtime | C#, .NET 10 |
+| Backend | ASP.NET Core Web API, REST, JSON |
+| Frontend | ASP.NET Core Razor Pages, Bootstrap, HttpClient |
+| Data access | Entity Framework Core, LINQ, SQLite |
+| Testing | xUnit, WebApplicationFactory, Microsoft.Testing.Platform |
+| API documentation | OpenAPI, Scalar API Reference |
+| Version control | Git, GitHub |
 
 
+## Architecture
 
-##### What I Learned
+The application separates the user interface, API, data access, and domain model so each project has a defined responsibility.
+
+```text
+Browser
+ |
+ v
+InventoryTracker.Web (Razor Pages)
+ | HTTP / JSON via HttpClient
+ v
+InventoryTracker.Api (Controllers and DTOs)
+ | EF Core queries and operations
+ v
+InventoryTracker.Data (DbContext and configuration)
+ |
+ v
+SQLite database
+```
+
+The API and Data projects use the entities defined in InventoryTracker.Domain. The Web project communicates with the API rather than accessing the database directly. DTOs define the data exchanged through the API, while view models represent the data used by the Web application.
+
+## Solution Structure
+
+| Project | Responsibility |
+| --- | --- |
+| `InventoryTracker.Domain` | Domain entities and relationships |
+| `InventoryTracker.Data` | EF Core DbContext, entity configurations, migrations, and database configuration |
+| `InventoryTracker.Api` | REST API controllers, DTOs, validation, and business rules |
+| `InventoryTracker.Web` | Razor Pages, view models, and API communication |
+| `InventoryTracker.Console` | Early development and persistence testing |
+| `InventoryTracker.Tests` | Domain unit tests and API integration tests |
 
 
+## Database Design
 
-My main goal with this project was to understand how the different parts of a .NET application work together.
+The application models a one-to-many relationship between categories and inventory items. Each inventory item belongs to one category, while a category can contain multiple inventory items.
 
-Throughout development, I gained practical experience with:
+```text
+Category (1) -------- (*) InventoryItem
+CategoryId                InventoryItemId
+Name                      Name
+                          Description
+                          Quantity
+                          ReorderLevel
+                          IsActive
+                          CategoryId (FK)
+```
 
-
-
-* Designing relational domain models
-* Configuring one-to-many relationships in EF Core
-* Managing database schemas through migrations
-* Writing asynchronous LINQ queries
-* Building REST APIs using controllers and DTOs
-* Working with HTTP status codes
-* Configuring dependency injection
-* Handling Razor Pages model binding
-* Communicating with an API through HttpClient
-* Implementing validation across application layers
-* Enforcing business rules
-* Writing integration tests with isolated databases
-* Debugging issues across the Web, API, and data access layers
+Entity Framework Core manages the relationship mapping and database schema through entity configurations and migrations. Low-stock status is determined from quantity, reorder level, and active status rather than stored as a separate database field.
 
 
+## REST API Endpoints
+
+### Inventory Items
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/InventoryItems` | List inventory items |
+| GET | `/api/InventoryItems/{id}` | Retrieve an inventory item |
+| POST | `/api/InventoryItems` | Create an inventory item |
+| PUT | `/api/InventoryItems/{id}` | Update an inventory item |
+| DELETE | `/api/InventoryItems/{id}` | Delete an inventory item |
+| GET | `/api/InventoryItems/low-stock` | List active low-stock items |
+| GET | `/api/InventoryItems/category/{categoryId}` | List items in a category |
+| GET | `/api/InventoryItems/category/{categoryId}/low-stock` | List active low-stock items in a category |
+| GET | `/api/InventoryItems/search?term={searchTerm}` | Search inventory items |
+
+
+### Categories
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/Categories` | List categories |
+| GET | `/api/Categories/{id}` | Retrieve a category |
+| POST | `/api/Categories` | Create a category |
+| PUT | `/api/Categories/{id}` | Update a category |
+| DELETE | `/api/Categories/{id}` | Delete an empty category |
+
+
+### Dashboard
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/Dashboard` | Retrieve dashboard summary counts |
+
+## Search Behavior
+
+Inventory searches match item names and descriptions. By default, a search term matches items containing the supplied text. Simple wildcard patterns are also supported:
+
+| Search | Behavior |
+| --- | --- |
+| `usb` | Contains "usb" |
+| `usb*` | Starts with "usb" |
+| `*usb` | Ends with "usb" |
+| `*usb*` | Contains "usb" |
+
+The application converts `*` into the SQL `LIKE` wildcard `%` when building the EF Core search query.
+
+
+## Validation and Error Handling
+
+Both the Web application and the API validate incoming data. Validation and business rules include:
+
+- Inventory and category names are required.
+- Text fields have maximum lengths.
+- Quantities and reorder levels must be non-negative.
+- Inventory items must belong to an existing category.
+- Categories containing inventory items cannot be deleted.
+
+- The Web interface provides error feedback, while the API independently validates requests, including requests originating outside the Web application.
+
+
+## Automated Testing
+
+The test project contains domain unit tests and API integration tests. Integration tests use xUnit, WebApplicationFactory, and isolated SQLite in-memory databases to execute HTTP requests against the API without modifying the application's local database.
+
+Test coverage includes:
+
+- New inventory items default to active.
+- Requests for missing inventory items return `404 Not Found`.
+- Requests for existing inventory items return the expected DTO.
+- Invalid Category IDs return `400 Bad Request`.
+- Categories containing inventory items cannot be deleted.
+- Empty categories can be deleted, and subsequent requests return `404 Not Found`.
+- The low-stock endpoint returns only active items meeting the low-stock criteria.
+
+Run the test suite from the solution directory:
+
+```powershell
+dotnet test
+```
+
+The root `global.json` configures Microsoft.Testing.Platform as the `dotnet test` runner for the .NET 10 SDK.
+
+
+## Getting Started
+
+### Requirements
+
+- .NET 10 SDK
+- Git
+- Entity Framework Core CLI (`dotnet-ef`), compatible with the project's EF Core version
+- Visual Studio 2026 or another .NET-compatible IDE (optional for command-line use)
+
+### 1. Clone the Repository
+
+```powershell
+git clone https://github.RobertMoore2052/InventoryTrackerv2.git
+cd InventoryTrackerv2
+```
+
+### 2. Restore Dependencies and Build
+
+```powershell
+dotnet restore
+dotnet build
+```
+
+### 3. Set Up the Database
+
+InventoryTracker uses SQLite for local database storage and EF Core migrations to manage the database schema. Verify that the EF Core CLI is installed:
+
+```powershell
+dotnet ef --version
+```
+
+If necessary, install the CLI tool with a version compatible with the project's EF Core packages. Apply the migrations from the solution directory:
+
+```powershell
+dotnet ef database update --project InventoryTracker.Data --startup-project InventoryTracker.Api
+```
+
+A newly initialized database may be empty. Categories and inventory items can be created using the Web application after startup.
+
+### 4. Run the Application
+
+The API and Web projects must both be running. In Visual Studio:
+
+1. Right-click the solution and select **Properties**.
+2. Under **Configure Startup Projects**, select **Multiple startup projects**.
+3. Set `InventoryTracker.Api` and `InventoryTracker.Web` to **Start**. Set the remaining projects to **None**.
+4. Start debugging with **F5**.
+
+Alternatively, run the two projects in separate terminals from the solution directory:
+
+```powershell
+# Terminal 1
+dotnet run --project InventoryTracker.Api
+```
+
+```powershell
+# Terminal 2
+dotnet run --project InventoryTracker.Web
+```
+
+Ensure the `ApiBaseUrl` setting in `InventoryTracker.Web/appsettings.json` matches the address of the running API. Open the Web application's displayed local URL in your browser. In the API's Development environment, the Scalar API reference is available at `/scalar`.
+
+
+## What I Learned
+
+My main goal with this project was to understand how the different parts of a .NET application work together. Throughout development, I gained practical experience with:
+
+- Designing relational domain models and configuring one-to-many relationships.
+- Managing database schemas with EF Core migrations and executing asynchronous LINQ queries.
+- Building REST APIs with controllers, DTOs, HTTP status codes, and dependency injection.
+- Working with Razor Pages model binding and API communication through HttpClient.
+- Implementing validation and enforcing business rules across application layers.
+- Writing integration tests with isolated databases.
+- Debugging issues across the Web, API, and data access layers.
 
 Working through an entire application gave me a better understanding of how architectural decisions affect maintainability, testing, and communication between projects.
 
+## Project Status
 
+The core application is complete, including inventory and category management, search, low-stock monitoring, dashboard reporting, validation, and automated testing.
 
-
-
-##### Project Status
-
-
-
-The core application is complete, including inventory management, category management, search, low-stock monitoring, dashboard reporting, validation, and automated testing.
-
-
-
-Remaining work includes:
-
-
-
-* Final user interface improvements
-* Adding application screenshots
-* Preparing the application for deployment
-* Completing portfolio documentation
-
-
+The project currently runs locally. Public deployment is a potential future enhancement.
 
 This project serves as a practical demonstration of my experience building, testing, and organizing a full-stack .NET application.
-
-
-
