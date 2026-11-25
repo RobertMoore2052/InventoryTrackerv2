@@ -269,13 +269,14 @@ The seeder executes automatically when the API starts.
 #### Sample Data
 
 The seeder provides the following sample categories and inventory items:
-|Category|InventoryItem|Quantity|Reorder Level|
-|Electronics|Wireless Mouse|25|5|
-|Electronics|Keyboard|15|5|
-|Office Supplies|Printer Paper|50|10|
-|Office Supplies|Ballpoint Pens|100|20|
-|Tools|Hammer|12|3|
-|Tools|Screwdriver Set|8|10
+| Category | Inventory Item | Quantity | Reorder Level |
+|---|---|---:|---:|
+| Electronics | Wireless Mouse | 25 | 5 |
+| Electronics | Keyboard | 15 | 5 |
+| Office Supplies | Printer Paper | 50 | 10 |
+| Office Supplies | Ballpoint Pens | 100 | 20 |
+| Tools | Hammer | 12 | 3 |
+| Tools | Screwdriver Set | 8 | 10 |
 
 The sample dataset includes a low-stock inventory item to demonstrate inventory reorder functionality.
 
@@ -295,7 +296,7 @@ After the sample data has been populated, set the configuration property back to
 "SeedSampleData": false
 ```
 
-Disabling the seeder does not remove existing records. It prevents the automatic restoration of sample records during subsequent application startus.
+Disabling the seeder does not remove existing records. It prevents the automatic restoration of sample records during subsequent application startups.
 
 Sample data seeding is disabled by default.
 
